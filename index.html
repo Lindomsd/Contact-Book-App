@@ -60,6 +60,22 @@
             window.open("edit-contact.html?id=" + id, "_self");
         }
 
+        // Fetch a single contact's information by ID
+        function fetchContactInfo(contactId) {
+            return fetch(rootPath + "controller/get-contact/?id=" + contactId)
+                .then(function(response) {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(function(data) {
+                    return data;
+                })
+                .catch(function(error) {
+                    console.error('Fetch error:', error);
+                    return null;
+                });
+        }
+
         // Initial load of contacts when page loads
         fetchContacts();
     });

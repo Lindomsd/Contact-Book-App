@@ -53,20 +53,32 @@
         function getContact() {
             fetch(rootPath + "controller/get-contact/?id=" + id)
                 .then(function (response) {
+                    if (!response.ok) throw new Error('Network response was not ok');
                     return response.json();
                 })
                 .then(function (data) {
+                    if (!data || !data[0]) {
+                        document.getElementById("avatarImage").innerHTML = "<p style='color:red;'>No contact information found.</p>";
+                        setReadOnly(true);
+                        return;
+                    }
                     displayOutput(data);
+                })
+                .catch(function (error) {
+                    document.getElementById("avatarImage").innerHTML = `<p style='color:red;'>Failed to load contact info: ${error.message}</p>`;
+                    setReadOnly(true);
                 });
         }
 
         function displayOutput(data) {
-            document.getElementById("avatarImage").innerHTML = `<img src="${rootPath}controller/uploads/${data[0].avatar}" width="200"/>`;
+            // Add cache-busting query param to always fetch latest image
+            const avatarUrl = `${rootPath}controller/uploads/${data[0].avatar}?t=${Date.now()}`;
+            document.getElementById("avatarImage").innerHTML = `<img src="${avatarUrl}" width="200"/>`;
             document.getElementById("firstname").value = data[0].firstname;
             document.getElementById("lastname").value = data[0].lastname;
             document.getElementById("mobile").value = data[0].mobile;
             document.getElementById("email").value = data[0].email;
-            setReadOnly(true);
+            setReadOnly(true); // Fields are readonly until Edit is clicked
         }
 
         function setReadOnly(state) {
@@ -80,14 +92,20 @@
         }
 
         function enableEdit() {
-            setReadOnly(false);
+            setReadOnly(false); // Enable fields and show update/avatar
         }
 
         function updateContact(e) {
             e.preventDefault();
-            const form = new FormData(document.querySelector("#editForm"));
+            const formElem = document.querySelector("#editForm");
+            const form = new FormData(formElem);
             form.append("id", id);
             form.append("apiKey", apiKey);
+            // Only append avatar if a file is selected
+            const avatarInput = document.getElementById("avatar");
+            if (avatarInput.files.length > 0) {
+                form.append("avatar", avatarInput.files[0]);
+            }
             fetch(rootPath + 'controller/update-contact/', {
                 method: "POST",
                 headers: { 'Accept': 'application/json, *.*' },
@@ -108,6 +126,7 @@
         }
 
         function deleteContact() {
+            // Confirm and delete contact
             if (!confirm("Are you sure you want to delete this contact?")) return;
             fetch(rootPath + 'controller/delete-contact/', {
                 method: "POST",
