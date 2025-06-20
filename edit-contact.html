@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>Edit Contact</title>
+</head>
+<body>
+    <div id="avatarImage"></div>
+    <form id="editForm">
+        <label for="firstname">First Name:</label>
+        <input type="text" id="firstname" name="firstname"><br/>
+
+        <label for="lastname">Last Name:</label>
+        <input type="text" id="lastname" name="lastname"><br/>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email"><br/>
+
+        <label for="mobile">Mobile:</label>
+        <input type="text" id="mobile" name="mobile"><br/>
+
+        <label for="avatar">Select a file:</label>
+        <input type="file" name="avatar" id="avatar"><br/>
+    </form>
+
+    <br/><br/>
+    <button id="homeLink" type="button">Home</button>
+    <button id="editContact" type="button">Edit</button>
+    <button id="deleteContact" type="button">Delete</button>
+
+    <script src="config.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const id = getId();
+            console.log("The ID is:", id);
+
+            getContact(id);
+
+            document.getElementById("homeLink").addEventListener("click", homeLink);
+        });
+
+        function getId() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get("id");
+        }
+
+        function getContact(id) {
+            fetch(rootPath + "controller/get-contact/?id=" + id)
+                .then(function (response) {
+                    return response.json();
+                })
+                .then(function (data) {
+                    displayOutput(data);
+                    console.log(data);
+                    
+                })
+                
+        }
+
+        function homeLink() {
+            window.open("index.html", "_self");
+        }
+
+        function displayOutput(data){
+            avataImg = `
+                <img src="${rootPath}controller/uploads/${data[0].avatar}" width="200"/>
+
+            `
+            document.getElementById("avatarImage").innerHTML = "avatarImg";
+        }
+    </script>
+</body>
+</html>
